@@ -1,0 +1,10 @@
+﻿---
+BreakBeforeBraces: Mozilla
+Language: Cpp
+NamespaceIndentation: All
+SortIncludes: 'true'
+SortUsingDeclarations: 'true'
+Standard: Cpp11
+TabWidth: '4'
+
+...
