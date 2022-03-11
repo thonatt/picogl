@@ -39,7 +39,7 @@ namespace picogl
 		};
 
 		PixelInfo get_pixel_info(const GLenum internal_format);
-		GLuint get_sizeof(const GLenum type);
+		GLuint get_scalar_sizeof(const GLenum type);
 
 		template<typename Container>
 		GLuint get_data_size(const Container& container);
@@ -399,6 +399,7 @@ namespace picogl
 		void clear(GLenum buffer, const std::array<T, 4>& rgba = {}, GLint attachement_index = 0) const;
 
 		void readback(void* dst, GLint x, GLint y, GLsizei width, GLsizei height, GLenum attach_from = GL_COLOR_ATTACHMENT0) const;
+		void readback(void* dst, GLenum attach_from = GL_COLOR_ATTACHMENT0) const;
 
 		void blit_to(
 			Framebuffer& to,
@@ -518,7 +519,7 @@ namespace picogl
 	template<typename Container>
 	Mesh& Mesh::set_indices(const GLenum primitive_type, const Container& indices, const GLenum type)
 	{
-		const GLuint type_sizeof = impl::get_sizeof(type);
+		const GLuint type_sizeof = impl::get_scalar_sizeof(type);
 		const GLuint indice_sizeof = sizeof(Container::value_type);
 
 		PICOGL_ASSERT(m_vao);
@@ -600,7 +601,7 @@ namespace picogl
 	{
 		inline PixelInfo::PixelInfo(GLenum internal_format, GLenum format, GLenum type, GLuint channel_count)
 			: m_internal_format{ internal_format }, m_format{ format }, m_type{ type }, m_channel_count{ channel_count },
-			m_scalar_sizeof{ get_sizeof(type) }
+			m_scalar_sizeof{ get_scalar_sizeof(type) }
 		{
 		}
 
@@ -622,16 +623,22 @@ namespace picogl
 			return gl_pixel_infos.at(internal_format);
 		}
 
-		inline GLuint get_sizeof(const GLenum type)
+		inline GLuint get_scalar_sizeof(const GLenum type)
 		{
-			static const std::unordered_map<GLenum, GLuint> gl_type_sizeofs = {
+			static const std::unordered_map<GLenum, GLuint> gl_scalar_type_sizeofs = {
+				{ GL_BYTE, 1 },
 				{ GL_UNSIGNED_BYTE, 1 },
+				{ GL_SHORT, 2 },
+				{ GL_UNSIGNED_SHORT, 2 },
 				{ GL_INT, 4 },
 				{ GL_UNSIGNED_INT, 4 },
-				{ GL_FLOAT, 4 }
+				{ GL_FIXED, 4 },
+				{ GL_HALF_FLOAT, 2 },
+				{ GL_FLOAT, 4 },
+				{ GL_DOUBLE, 8 },
 			};
 
-			return gl_type_sizeofs.at(type);
+			return gl_scalar_type_sizeofs.at(type);
 		}
 	}
 
@@ -1216,6 +1223,11 @@ namespace picogl
 		glReadPixels(x, y, width, height, attachment.get_format(), attachment.get_type(), dst);
 	}
 
+	inline void Framebuffer::readback(void* dst, GLenum attach_from) const
+	{
+		readback(dst, 0, 0, m_width, m_height, attach_from);
+	}
+
 	inline void Framebuffer::blit_to(Framebuffer& to, const GLenum attachment_to, const GLenum filter, const GLenum attachment_from) const
 	{
 		bind_read(attachment_from);
@@ -1305,13 +1317,13 @@ namespace picogl
 
 		GLsizei attributes_sizeof = 0;
 		for (const Mesh::VertexAttribute& attribute : meshes.front().get().m_vertex_attributes)
-			attributes_sizeof += attribute.m_channel_count * impl::get_sizeof(attribute.m_type);
+			attributes_sizeof += attribute.m_channel_count * impl::get_scalar_sizeof(attribute.m_type);
 
 		GLsizeiptr attribute_offset = 0;
 		for (GLuint index = 0; index < attribute_count; ++index) {
 			const Mesh::VertexAttribute& attribute = meshes.front().get().m_vertex_attributes[index];
 			dst.setup_attribute_pointer(index, attribute_offset, attributes_sizeof, attribute);
-			attribute_offset += attribute.m_channel_count * impl::get_sizeof(attribute.m_type);
+			attribute_offset += attribute.m_channel_count * impl::get_scalar_sizeof(attribute.m_type);
 		}
 
 		// Combine submeshes and gpu-copy buffers.
@@ -1364,7 +1376,7 @@ namespace picogl
 		{
 			PICOGL_ASSERT(attribute.m_size > 0);
 			total_size += attribute.m_size;
-			attributes_sizeof += attribute.m_channel_count * impl::get_sizeof(attribute.m_type);
+			attributes_sizeof += attribute.m_channel_count * impl::get_scalar_sizeof(attribute.m_type);
 		}
 		m_vertex_buffer = Buffer::make(GL_ARRAY_BUFFER, total_size);
 
@@ -1405,7 +1417,7 @@ namespace picogl
 
 	inline void Mesh::set_vertex_attribute(std::vector<char>& vertex_data, GLuint& index, std::size_t& offset, const GLsizei stride, const VertexAttribute& attribute)
 	{
-		const std::size_t scalar_sizeof = impl::get_sizeof(attribute.m_type);
+		const std::size_t scalar_sizeof = impl::get_scalar_sizeof(attribute.m_type);
 		const std::size_t attribute_sizeof = scalar_sizeof * attribute.m_channel_count;
 		PICOGL_ASSERT(attribute.m_size % attribute_sizeof == 0);
 
@@ -1474,7 +1486,7 @@ namespace picogl
 	{
 		GLsizei vertex_sizeof = 0;
 		for (const VertexAttribute& attribute : m_vertex_attributes)
-			vertex_sizeof += attribute.m_channel_count * impl::get_sizeof(attribute.m_type);
+			vertex_sizeof += attribute.m_channel_count * impl::get_scalar_sizeof(attribute.m_type);
 		return vertex_sizeof;
 	}
 
