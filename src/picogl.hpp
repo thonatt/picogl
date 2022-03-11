@@ -2,10 +2,9 @@
 #define PICOGL_INCLUDE
 
 #include <array>
-#include <vector>
-#include <memory>
-#include <string>
 #include <utility>
+#include <vector>
+#include <string>
 
 #ifndef PICOGL_ASSERT
 #include <cassert>
@@ -63,150 +62,21 @@ namespace picogl
 		class GLObject
 		{
 		public:
-			static GLObject make_default();
-
 			template<typename ...Args>
 			static GLObject make(Args&& ...args);
 
+			GLObject();
+			GLObject(GLObject&& rhs);
+			GLObject& operator=(GLObject&& rhs);
+
 			operator GLuint() const;
+
+			~GLObject();
 
 		protected:
 			using Traits = GLTraits<Type>;
-			std::unique_ptr<GLuint, decltype(&Traits::deleter)> m_id = { nullptr, {} };
+			GLuint m_id = 0;
 		};
-
-		template<>
-		struct GLTraits<GLObjectType::Buffer>
-		{
-			static void creator(GLuint* gl)
-			{
-				glCreateBuffers(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteBuffers(1, gl);
-			}
-		};
-
-		template<>
-		struct GLTraits<GLObjectType::Framebuffer>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenFramebuffers(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteFramebuffers(1, gl);
-			}
-		};
-
-		template<>
-		struct GLTraits<GLObjectType::Query>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenQueries(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteQueries(1, gl);
-			}
-		};
-
-		template<>
-		struct GLTraits<GLObjectType::Program>
-		{
-			static void creator(GLuint* gl)
-			{
-				*gl = glCreateProgram();
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteProgram(*gl);
-			}
-		};
-
-		template<>
-		struct GLTraits<GLObjectType::RenderBuffer>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenRenderbuffers(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteRenderbuffers(1, gl);
-			}
-		};
-
-		template<>
-		struct GLTraits<GLObjectType::Shader>
-		{
-			static void creator(GLuint* gl, const GLenum shader_type)
-			{
-				*gl = glCreateShader(shader_type);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteShader(*gl);
-			}
-		};
-
-		template<>
-		struct GLTraits<GLObjectType::Texture>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenTextures(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteTextures(1, gl);
-			}
-		};
-
-		template<>
-		struct GLTraits<GLObjectType::VertexArray>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenVertexArrays(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteVertexArrays(1, gl);
-			}
-		};
-
-		template<GLObjectType Type>
-		inline GLObject<Type>::operator GLuint() const
-		{
-			return m_id ? *m_id : 0;
-		}
-
-		template<GLObjectType Type>
-		inline GLObject<Type> GLObject<Type>::make_default()
-		{
-			GLObject<Type> obj;
-			obj.m_id = { new GLuint(0), &Traits::deleter };
-			return obj;
-		}
-
-		template<GLObjectType Type>
-		template<typename ...Args>
-		inline GLObject<Type> GLObject<Type>::make(Args && ...args)
-		{
-			GLObject<Type> obj = make_default();
-			Traits::creator(obj.m_id.get(), std::forward<Args>(args)...);
-			return obj;
-		}
-
-		template<typename Container>
-		GLuint get_data_size(const Container& container)
-		{
-			return GLuint(container.size() * sizeof(typename Container::value_type));
-		}
 	}
 
 	GLenum gl_debug(std::string& message);
@@ -506,6 +376,158 @@ namespace picogl
 		impl::GLObject<impl::GLObjectType::Query> m_gl;
 		GLenum m_target = {};
 	};
+
+	namespace impl
+	{
+
+		template<>
+		struct GLTraits<GLObjectType::Buffer>
+		{
+			static void creator(GLuint* gl)
+			{
+				glCreateBuffers(1, gl);
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteBuffers(1, gl);
+			}
+		};
+
+		template<>
+		struct GLTraits<GLObjectType::Framebuffer>
+		{
+			static void creator(GLuint* gl)
+			{
+				glGenFramebuffers(1, gl);
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteFramebuffers(1, gl);
+			}
+		};
+
+		template<>
+		struct GLTraits<GLObjectType::Query>
+		{
+			static void creator(GLuint* gl)
+			{
+				glGenQueries(1, gl);
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteQueries(1, gl);
+			}
+		};
+
+		template<>
+		struct GLTraits<GLObjectType::Program>
+		{
+			static void creator(GLuint* gl)
+			{
+				*gl = glCreateProgram();
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteProgram(*gl);
+			}
+		};
+
+		template<>
+		struct GLTraits<GLObjectType::RenderBuffer>
+		{
+			static void creator(GLuint* gl)
+			{
+				glGenRenderbuffers(1, gl);
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteRenderbuffers(1, gl);
+			}
+		};
+
+		template<>
+		struct GLTraits<GLObjectType::Shader>
+		{
+			static void creator(GLuint* gl, const GLenum shader_type)
+			{
+				*gl = glCreateShader(shader_type);
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteShader(*gl);
+			}
+		};
+
+		template<>
+		struct GLTraits<GLObjectType::Texture>
+		{
+			static void creator(GLuint* gl)
+			{
+				glGenTextures(1, gl);
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteTextures(1, gl);
+			}
+		};
+
+		template<>
+		struct GLTraits<GLObjectType::VertexArray>
+		{
+			static void creator(GLuint* gl)
+			{
+				glGenVertexArrays(1, gl);
+			}
+			static void deleter(const GLuint* gl)
+			{
+				glDeleteVertexArrays(1, gl);
+			}
+		};
+
+		template<GLObjectType Type>
+		inline GLObject<Type>::GLObject() = default;
+
+		template<GLObjectType Type>
+		inline GLObject<Type>::GLObject(GLObject&& rhs)
+		{
+			std::swap(m_id, rhs.m_id);
+		}
+
+		template<GLObjectType Type>
+		inline GLObject<Type>& GLObject<Type>::operator=(GLObject&& rhs)
+		{
+			std::swap(m_id, rhs.m_id);
+			return *this;
+		}
+
+		template<GLObjectType Type>
+		inline GLObject<Type>::operator GLuint() const
+		{
+			return m_id;
+		}
+
+		template<GLObjectType Type>
+		inline GLObject<Type>::~GLObject()
+		{
+			if (m_id)
+				Traits::deleter(&m_id);
+		}
+
+		template<GLObjectType Type>
+		template<typename ...Args>
+		inline GLObject<Type> GLObject<Type>::make(Args && ...args)
+		{
+			GLObject<Type> obj;
+			Traits::creator(&obj.m_id, std::forward<Args>(args)...);
+			return obj;
+		}
+
+		template<typename Container>
+		GLuint get_data_size(const Container& container)
+		{
+			return GLuint(container.size() * sizeof(typename Container::value_type));
+		}
+	}
 
 	template<typename Container>
 	Mesh::VertexAttribute::VertexAttribute(const Container& container, const GLenum type, const GLsizei channels, const bool normalized)
@@ -1131,7 +1153,6 @@ namespace picogl
 	{
 		static Framebuffer default_framebuffer = [] {
 			Framebuffer fb;
-			fb.m_gl = impl::GLObject<impl::GLObjectType::Framebuffer>::make_default();
 			fb.m_sample_count = 1;
 			return fb;
 		}();
@@ -1161,7 +1182,7 @@ namespace picogl
 		Texture::Options options = {};
 		if (m_depth_attachment)
 			options = options | Texture::Options::FixedSampleLocations | Texture::Options::AutomaticAlignment;
-		
+
 		m_attachments.push_back(attachment_index);
 		switch (target)
 		{
@@ -1463,9 +1484,8 @@ namespace picogl
 			if (m_indirect_draw_buffer) {
 				m_indirect_draw_buffer.bind();
 				glMultiDrawElementsIndirect(m_primitive_type, m_indice_type, 0, GLsizei(m_submeshes.size()), 0);
-			} else {
+			} else
 				glDrawElements(m_primitive_type, m_index_count, m_indice_type, 0);
-			}
 		} else
 			glDrawArrays(m_primitive_type, 0, m_index_count);
 	}
