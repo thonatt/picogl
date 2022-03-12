@@ -692,8 +692,7 @@ struct DemoApp : framework::Application
 
 	void render() override
 	{
-		const picogl::Framebuffer& main_framebuffer = picogl::Framebuffer::get_default();
-		main_framebuffer.clear();
+		picogl::Framebuffer::get_default().clear();
 
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_BLEND);

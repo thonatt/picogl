@@ -2,9 +2,9 @@
 #define PICOGL_INCLUDE
 
 #include <array>
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
 
 #ifndef PICOGL_ASSERT
 #include <cassert>
@@ -253,7 +253,7 @@ namespace picogl
 	{
 	public:
 		static Framebuffer make(const GLsizei width, const GLsizei height, const GLsizei sample_count = 1);
-		static const Framebuffer& get_default(const GLsizei width = 0, const GLsizei height = 0);
+		static Framebuffer get_default(const GLsizei width = 0, const GLsizei height = 0, const GLsizei sample_count = 1);
 
 		Framebuffer& set_depth_attachment(const GLenum format = GL_DEPTH_COMPONENT32);
 		Framebuffer& add_color_attachment(const GLenum internal_format, const GLenum target = GL_TEXTURE_2D);
@@ -1143,23 +1143,19 @@ namespace picogl
 	{
 		Framebuffer framebuffer;
 		framebuffer.m_gl = impl::GLObject<impl::GLObjectType::Framebuffer>::make();
+		framebuffer.m_sample_count = sample_count;
 		framebuffer.m_width = width;
 		framebuffer.m_height = height;
-		framebuffer.m_sample_count = sample_count;
 		return framebuffer;
 	}
 
-	inline const Framebuffer& Framebuffer::get_default(const GLsizei width, const GLsizei height)
+	inline Framebuffer Framebuffer::get_default(const GLsizei width, const GLsizei height, const GLsizei sample_count)
 	{
-		static Framebuffer default_framebuffer = [] {
-			Framebuffer fb;
-			fb.m_sample_count = 1;
-			return fb;
-		}();
-
-		default_framebuffer.m_width = width;
-		default_framebuffer.m_height = height;
-		return default_framebuffer;
+		Framebuffer fb;
+		fb.m_sample_count = sample_count;
+		fb.m_width = width;
+		fb.m_height = height;
+		return fb;
 	}
 
 	inline Framebuffer& Framebuffer::set_depth_attachment(const GLenum format)
