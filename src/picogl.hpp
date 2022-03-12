@@ -55,8 +55,11 @@ namespace picogl
 			VertexArray
 		};
 
+		template<GLObjectType Type, typename ...Args>
+		void gl_creator(GLuint* gl, Args ...args);
+
 		template<GLObjectType Type>
-		struct GLTraits;
+		void gl_deleter(const GLuint* gl);
 
 		template<GLObjectType Type>
 		class GLObject
@@ -74,7 +77,7 @@ namespace picogl
 			~GLObject();
 
 		protected:
-			using Traits = GLTraits<Type>;
+			//using Traits = GLTraits<Type>;
 			GLuint m_id = 0;
 		};
 	}
@@ -379,110 +382,85 @@ namespace picogl
 
 	namespace impl
 	{
+		template<>
+		inline void gl_creator<GLObjectType::Buffer>(GLuint* gl) {
+			glCreateBuffers(1, gl);
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::Buffer>
-		{
-			static void creator(GLuint* gl)
-			{
-				glCreateBuffers(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteBuffers(1, gl);
-			}
-		};
+		inline void gl_deleter<GLObjectType::Buffer>(const GLuint* gl) {
+			glDeleteBuffers(1, gl);
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::Framebuffer>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenFramebuffers(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteFramebuffers(1, gl);
-			}
-		};
+		inline void gl_creator<GLObjectType::Framebuffer>(GLuint* gl) {
+			glGenFramebuffers(1, gl);
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::Query>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenQueries(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteQueries(1, gl);
-			}
-		};
+		inline void gl_deleter<GLObjectType::Framebuffer>(const GLuint* gl) {
+			glDeleteFramebuffers(1, gl);
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::Program>
-		{
-			static void creator(GLuint* gl)
-			{
-				*gl = glCreateProgram();
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteProgram(*gl);
-			}
-		};
+		inline void gl_creator<GLObjectType::Query>(GLuint* gl) {
+			glGenQueries(1, gl);
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::RenderBuffer>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenRenderbuffers(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteRenderbuffers(1, gl);
-			}
-		};
+		inline void gl_deleter<GLObjectType::Query>(const GLuint* gl) {
+			glDeleteQueries(1, gl);
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::Shader>
-		{
-			static void creator(GLuint* gl, const GLenum shader_type)
-			{
-				*gl = glCreateShader(shader_type);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteShader(*gl);
-			}
-		};
+		inline void gl_creator<GLObjectType::Program>(GLuint* gl) {
+			*gl = glCreateProgram();
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::Texture>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenTextures(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteTextures(1, gl);
-			}
-		};
+		inline void gl_deleter<GLObjectType::Program>(const GLuint* gl) {
+			glDeleteProgram(*gl);
+		}
 
 		template<>
-		struct GLTraits<GLObjectType::VertexArray>
-		{
-			static void creator(GLuint* gl)
-			{
-				glGenVertexArrays(1, gl);
-			}
-			static void deleter(const GLuint* gl)
-			{
-				glDeleteVertexArrays(1, gl);
-			}
-		};
+		inline void gl_creator<GLObjectType::RenderBuffer>(GLuint* gl) {
+			glGenRenderbuffers(1, gl);
+		}
+
+		template<>
+		inline void gl_deleter<GLObjectType::RenderBuffer>(const GLuint* gl) {
+			glDeleteRenderbuffers(1, gl);
+		}
+
+		template<>
+		inline void gl_creator<GLObjectType::Shader, GLenum>(GLuint* gl, const GLenum shader_type) {
+			*gl = glCreateShader(shader_type);
+		}
+
+		template<>
+		inline void gl_deleter<GLObjectType::Shader>(const GLuint* gl) {
+			glDeleteShader(*gl);
+		}
+
+		template<>
+		inline void gl_creator<GLObjectType::Texture>(GLuint* gl) {
+			glGenTextures(1, gl);
+		}
+
+		template<>
+		inline void gl_deleter<GLObjectType::Texture>(const GLuint* gl) {
+			glDeleteTextures(1, gl);
+		}
+
+		template<>
+		inline void gl_creator<GLObjectType::VertexArray>(GLuint* gl) {
+			glGenVertexArrays(1, gl);
+		}
+
+		template<>
+		inline void gl_deleter<GLObjectType::VertexArray>(const GLuint* gl) {
+			glDeleteVertexArrays(1, gl);
+		}
 
 		template<GLObjectType Type>
 		inline GLObject<Type>::GLObject() = default;
@@ -510,7 +488,7 @@ namespace picogl
 		inline GLObject<Type>::~GLObject()
 		{
 			if (m_id)
-				Traits::deleter(&m_id);
+				gl_deleter<Type>(&m_id);
 		}
 
 		template<GLObjectType Type>
@@ -518,7 +496,7 @@ namespace picogl
 		inline GLObject<Type> GLObject<Type>::make(Args && ...args)
 		{
 			GLObject<Type> obj;
-			Traits::creator(&obj.m_id, std::forward<Args>(args)...);
+			gl_creator<Type>(&obj.m_id, std::forward<Args>(args)...);
 			return obj;
 		}
 
