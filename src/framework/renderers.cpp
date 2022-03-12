@@ -1,8 +1,8 @@
-#include <framework/include/renderers.h>
-#include <framework/include/asset_io.h>
+#include <picogl/framework/renderers.h>
+#include <picogl/framework/asset_io.h>
 
 #define PICOGL_IMPLEMENTATION
-#include <picogl.hpp>
+#include <picogl/picogl.hpp>
 
 #include <spdlog/spdlog.h>
 #include <glm/gtc/type_ptr.hpp>

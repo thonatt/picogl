@@ -1,8 +1,8 @@
-#include <framework/include/application.h>
-#include <framework/include/renderers.h>
-#include <framework/include/asset_io.h>
-#include <framework/include/viewport.h>
-#include <framework/include/image.h>
+#include <picogl/framework/application.h>
+#include <picogl/framework/renderers.h>
+#include <picogl/framework/asset_io.h>
+#include <picogl/framework/viewport.h>
+#include <picogl/framework/image.h>
 
 #include <spdlog/spdlog.h>
 #include <glm/glm.hpp>
@@ -11,7 +11,7 @@
 #include <imgui.h>
 
 #define PICOGL_IMPLEMENTATION
-#include <picogl.hpp>
+#include <picogl/picogl.hpp>
 
 #include <algorithm>
 #include <filesystem>

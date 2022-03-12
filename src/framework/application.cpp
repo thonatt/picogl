@@ -1,4 +1,4 @@
-#include <framework/include/application.h>
+#include <picogl/framework/application.h>
 
 #include <spdlog/spdlog.h>
 
@@ -7,7 +7,7 @@
 #include <backends/imgui_impl_opengl3.h>
 
 #define PICOGL_IMPLEMENTATION
-#include <picogl.hpp>
+#include <picogl/picogl.hpp>
 
 namespace framework
 {

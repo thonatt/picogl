@@ -1,4 +1,4 @@
-#include <framework/include/asset_io.h>
+#include <picogl/framework/asset_io.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -8,7 +8,7 @@
 
 #include <glad/glad.h>
 #define PICOGL_IMPLEMENTATION
-#include <picogl.hpp>
+#include <picogl/picogl.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>

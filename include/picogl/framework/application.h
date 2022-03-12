@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 
-#include <picogl.hpp>
+#include <picogl/picogl.hpp>
 
 namespace framework
 {

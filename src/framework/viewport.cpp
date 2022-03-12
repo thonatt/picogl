@@ -1,7 +1,7 @@
-#include <framework/include/viewport.h>
+#include <picogl/framework/viewport.h>
 
 #define PICOGL_IMPLEMENTATION
-#include <picogl.hpp>
+#include <picogl/picogl.hpp>
 
 #include <glm/gtx/transform.hpp>
 
@@ -162,8 +162,8 @@ namespace framework
 		{
 			if (io.MouseWheel != 0.0f) {
 				const float ratio = std::pow(1.05f, -io.MouseWheel);
-				if (io.KeysDownDuration[GLFW_KEY_LEFT_CONTROL] > 0.0f) {
-					if (io.KeysDownDuration[GLFW_KEY_LEFT_SHIFT] > 0.0f)
+				if (ImGui::IsKeyDown(GLFW_KEY_LEFT_CONTROL)) {
+					if (ImGui::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
 						m_camera.m_near = std::min(m_camera.m_near / ratio, m_camera.m_far);
 					else
 						m_camera.m_far = std::max(m_camera.m_far / ratio, m_camera.m_near);
@@ -171,9 +171,9 @@ namespace framework
 					m_camera.m_position = m_camera.m_target + ratio * (m_camera.m_position - m_camera.m_target);
 			}
 
-			if (io.KeysDownDuration[GLFW_KEY_E] > 0.0f || io.KeysDownDuration[GLFW_KEY_D] > 0.0f) {
+			if (ImGui::IsKeyDown(GLFW_KEY_E) || ImGui::IsKeyDown(GLFW_KEY_D)){
 				glm::vec3 delta = (0.1f / 60.0f) * (m_camera.m_target - m_camera.m_position);
-				if (io.KeysDownDuration[GLFW_KEY_D] > 0.0f)
+				if (ImGui::IsKeyDown(GLFW_KEY_D))
 					delta = -delta;
 				m_camera.m_position += delta;
 				m_camera.m_target += delta;

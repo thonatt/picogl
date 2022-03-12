@@ -1,9 +1,9 @@
 #pragma once
 
-#include <framework/include/image.h>
+#include <picogl/framework/image.h>
 
 #include <glad/glad.h>
-#include <picogl.hpp>
+#include <picogl/picogl.hpp>
 
 #include <glm/glm.hpp>
 

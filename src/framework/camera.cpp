@@ -1,4 +1,4 @@
-#include <framework/include/camera.h>
+#include <picogl/framework/camera.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
