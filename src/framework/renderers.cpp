@@ -12,28 +12,23 @@ namespace framework
 	void SingleColorRenderer::render(const Camera& camera, const picogl::Mesh& mesh, const glm::mat4& model, const glm::vec4& color)
 	{
 		m_program.use();
-
 		const glm::mat3 model_transform = glm::transpose(glm::inverse(glm::mat3(model)));
-
 		m_program.set_uniform("view_proj", glUniformMatrix4fv, 1, GL_FALSE, glm::value_ptr(camera.m_view_proj));
 		m_program.set_uniform("model", glUniformMatrix4fv, 1, GL_FALSE, glm::value_ptr(model));
 		m_program.set_uniform("normal_transform", glUniformMatrix3fv, 1, GL_FALSE, glm::value_ptr(model_transform));
 		m_program.set_uniform("uniform_color", glUniform4fv, 1, glm::value_ptr(color));
-
 		mesh.draw();
 	}
 
 	void PhongRenderer::render(const Camera& camera, const picogl::Mesh& mesh, const glm::mat4& model, const glm::vec3 light_position)
 	{
 		m_program.use();
-
 		const glm::mat3 model_transform = glm::transpose(glm::inverse(glm::mat3(model)));
 		m_program.set_uniform("view_proj", glUniformMatrix4fv, 1, GL_FALSE, glm::value_ptr(camera.m_view_proj));
 		m_program.set_uniform("model", glUniformMatrix4fv, 1, GL_FALSE, glm::value_ptr(model));
 		m_program.set_uniform("normal_transform", glUniformMatrix3fv, 1, GL_FALSE, glm::value_ptr(model_transform));
 		m_program.set_uniform("light_pos", glUniform3fv, 1, glm::value_ptr(light_position));
 		m_program.set_uniform("camera_pos", glUniform3fv, 1, glm::value_ptr(camera.m_position));
-
 		mesh.draw();
 	}
 

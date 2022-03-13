@@ -162,7 +162,7 @@ namespace framework
 			}
 
 			mesh.m_aabb = make_aabb(pos);
-			mesh.m_mesh = impl::make_triangle_mesh(indices, pos, ns, uvs, col);
+			mesh.m_mesh = utils::make_triangle_mesh(indices, pos, ns, uvs, col);
 			meshes.push_back(std::move(mesh));
 		}
 
@@ -269,7 +269,7 @@ namespace framework
 
 		Mesh mesh;
 		mesh.m_aabb = make_aabb(positions);
-		mesh.m_mesh = impl::make_triangle_mesh(tris, positions, std::vector<glm::vec3>(positions.size(), glm::vec3(1)), uvs, std::vector<glm::vec3>(positions.size(), glm::vec3(1)));
+		mesh.m_mesh = utils::make_triangle_mesh(tris, positions, std::vector<glm::vec3>(positions.size(), glm::vec3(1)), uvs, std::vector<glm::vec3>(positions.size(), glm::vec3(1)));
 		return mesh;
 	}
 
@@ -314,7 +314,7 @@ namespace framework
 
 		Mesh mesh;
 		mesh.m_aabb = make_aabb(positions);
-		mesh.m_mesh = impl::make_triangle_mesh(triangles, positions, normals, uvs, std::vector<glm::vec3>(positions.size(), glm::vec3(1)));
+		mesh.m_mesh = utils::make_triangle_mesh(triangles, positions, normals, uvs, std::vector<glm::vec3>(positions.size(), glm::vec3(1)));
 		return mesh;
 	}
 
@@ -356,7 +356,7 @@ namespace framework
 
 		Mesh mesh;
 		mesh.m_aabb = { glm::vec3(-1), glm::vec3(1) };
-		mesh.m_mesh = impl::make_triangle_mesh(triangles, positions, normals, uvs, std::vector<glm::vec3>(positions.size(), glm::vec3(1)));
+		mesh.m_mesh = utils::make_triangle_mesh(triangles, positions, normals, uvs, std::vector<glm::vec3>(positions.size(), glm::vec3(1)));
 		return mesh;
 	}
 
@@ -426,7 +426,7 @@ namespace framework
 		Image grads = Image::make<glm::vec2>(w / size + 1, h / size + 1, 2);
 		for (std::uint32_t y = 0; y < grads.m_height; ++y)
 			for (std::uint32_t x = 0; x < grads.m_width; ++x)
-				grads.at<glm::vec2>(x, y) = impl::make_random_direction<float, 2>();
+				grads.at<glm::vec2>(x, y) = utils::make_random_direction<float, 2>();
 
 		Image dst = Image::make<glm::vec4>(w, h, 4);
 		const float ratio = 1.0f / size;
@@ -440,19 +440,19 @@ namespace framework
 				const float fx = x * ratio;
 				const float dx = fx - (float)ix;
 
-				const float vx0 = impl::smoothstep(
+				const float vx0 = utils::smoothstep(
 					glm::dot(grads.at<glm::vec2>(ix + 0, iy + 0), glm::vec2(fx - (ix + 0), fy - (iy + 0))),
 					glm::dot(grads.at<glm::vec2>(ix + 1, iy + 0), glm::vec2(fx - (ix + 1), fy - (iy + 0))),
 					dx
 				);
 
-				const float vx1 = impl::smoothstep(
+				const float vx1 = utils::smoothstep(
 					glm::dot(grads.at<glm::vec2>(ix + 0, iy + 1), glm::vec2(fx - (ix + 0), fy - (iy + 1))),
 					glm::dot(grads.at<glm::vec2>(ix + 1, iy + 1), glm::vec2(fx - (ix + 1), fy - (iy + 1))),
 					dx
 				);
 
-				const float f = 0.5f * impl::smoothstep(vx0, vx1, dy) + 0.5f;
+				const float f = 0.5f * utils::smoothstep(vx0, vx1, dy) + 0.5f;
 				dst.at<glm::vec4>(x, y) = { f, f, f , 1.0f };
 			}
 		}
@@ -471,15 +471,6 @@ namespace framework
 			}
 		}
 		return dst;
-	}
-
-	namespace impl
-	{
-		float smoothstep(const float a, const float b, const float t)
-		{
-			const float u = t * t * (3.0f - 2.0f * t);
-			return glm::mix(a, b, u);
-		}
 	}
 
 	AABB AABB::make_empty()
@@ -509,6 +500,15 @@ namespace framework
 	{
 		m_min = glm::min(m_min, v);
 		m_max = glm::max(m_max, v);
+	}
+
+	namespace utils
+	{
+		float smoothstep(const float a, const float b, const float t)
+		{
+			const float u = t * t * (3.0f - 2.0f * t);
+			return glm::mix(a, b, u);
+		}
 	}
 }
 

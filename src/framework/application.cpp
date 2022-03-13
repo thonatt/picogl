@@ -80,8 +80,8 @@ namespace framework
 		const unsigned char* shading_langage_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
 		spdlog::info("picoGL setup:");
 		spdlog::info(" OpenGL version: {}.{}", GLVersion.major, GLVersion.minor);
-		spdlog::info(" GPU: {}", renderer);
-		spdlog::info(" GLSL version: {}", shading_langage_version);
+		spdlog::info(" GPU: {}", (const char*)renderer);
+		spdlog::info(" GLSL version: {}", (const char*)shading_langage_version);
 	}
 
 	void Application::launch()

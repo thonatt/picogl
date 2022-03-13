@@ -269,7 +269,7 @@ struct TexWindow : Window, framework::Viewport2D
 	static constexpr GLsizei readback_radius = 20;
 	static constexpr GLsizei readback_size = 2 * readback_radius + 1;
 
-	GLenum m_tex_wrap = GL_CLAMP_TO_BORDER;
+	GLenum m_tex_wrap = GL_REPEAT;
 	GLenum m_tex_mag_filter = GL_NEAREST;
 	GLenum m_tex_min_filter = GL_NEAREST_MIPMAP_NEAREST;
 	float m_lod = 0.0f;
@@ -574,7 +574,7 @@ struct RayMarchingWindow : Window, framework::Viewport3D
 				const float dy = y - w / 2.0f;
 				for (int x = 0; x < w; ++x) {
 					const float dx = x - w / 2.0f;
-					const float s = 1.0f + 0.75f * framework::impl::make_random_vec<float, 1>().x;
+					const float s = 1.0f + 0.75f * framework::utils::make_random_vec<>().x;
 					const float diff = glm::exp(-(dx * dx + dy * dy + dz * dz) / (2.0f * w));
 					const float density = 255.0f * s * diff;
 					const unsigned char d = static_cast<unsigned char>(glm::clamp(density, 0.0f, 255.0f));
@@ -662,19 +662,25 @@ struct DemoApp : framework::Application
 		if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(m_main_window.get(), GLFW_TRUE);
 
+		ImGui::SetNextWindowPos({ m_main_window_width * 0.7f, 0.0f });
+		ImGui::SetNextWindowSize({ m_main_window_width * 0.3f, m_main_window_height * 1.0f });
+
 		if (ImGui::Begin("Settings")) {
+			ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
 			if (ImGui::TreeNode("Texture Viewer"))
 			{
 				m_tex_window.settings_gui();
 				ImGui::TreePop();
 			}
-
+			ImGui::Separator();
+			ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
 			if (ImGui::TreeNode("Modeler"))
 			{
 				m_modeler_window.settings_gui();
 				ImGui::TreePop();
 			}
-
+			ImGui::Separator();
+			ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
 			if (ImGui::TreeNode("Raymarcher"))
 			{
 				m_raymarching_window.settings_gui();
@@ -683,11 +689,17 @@ struct DemoApp : framework::Application
 		}
 		ImGui::End();
 
-		m_tex_window.gui();
-		m_modeler_window.gui();
+		ImGui::SetNextWindowPos({ 0.0f, 0.0f });
+		ImGui::SetNextWindowSize({ m_main_window_width * 0.35f, m_main_window_height * 0.5f });
 		m_raymarching_window.gui();
 
-		//ImGui::ShowDemoWindow();
+		ImGui::SetNextWindowPos({ m_main_window_width * 0.35f, 0.0f });
+		ImGui::SetNextWindowSize({ m_main_window_width * 0.35f, m_main_window_height * 0.5f });
+		m_modeler_window.gui();
+
+		ImGui::SetNextWindowPos({ 0.0f, m_main_window_height * 0.5f });
+		ImGui::SetNextWindowSize({ m_main_window_width * 0.35f, m_main_window_height * 0.5f });
+		m_tex_window.gui();
 	}
 
 	void render() override

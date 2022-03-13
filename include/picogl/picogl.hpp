@@ -77,7 +77,6 @@ namespace picogl
 			~GLObject();
 
 		protected:
-			//using Traits = GLTraits<Type>;
 			GLuint m_id = 0;
 		};
 	}
@@ -195,8 +194,8 @@ namespace picogl
 
 		Texture& bind();
 		const Texture& bind() const;
-		bool is_array() const;
-		bool is_multi_sampled() const;
+		GLsizei array_size() const;
+		GLsizei sample_count() const;
 
 		Texture& set_swizzling(const std::array<GLint, 4>& swizzle_mask = { GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA });
 		Texture& set_wrapping(const GLenum s = GL_REPEAT, const GLenum t = GL_REPEAT, const GLenum r = GL_REPEAT);
@@ -586,11 +585,11 @@ namespace picogl
 
 #ifdef PICOGL_IMPLEMENTATION
 
+#include <algorithm>
 #include <array>
 #include <cmath>
-#include <type_traits>
-#include <algorithm>
 #include <functional>
+#include <type_traits>
 #include <utility>
 
 #define PICOGL_ENUM_STR(name) { name, #name }
@@ -858,14 +857,14 @@ namespace picogl
 		return texture;
 	}
 
-	inline bool Texture::is_array() const
+	inline GLsizei Texture::array_size() const
 	{
-		return m_array_size > 1;
+		return m_array_size;
 	}
 
-	inline bool Texture::is_multi_sampled() const
+	inline GLsizei Texture::sample_count() const
 	{
-		return m_sample_count > 1;
+		return m_sample_count;
 	}
 
 	inline Texture& Texture::bind()
@@ -954,14 +953,14 @@ namespace picogl
 
 	inline void Texture::bind_as_sampler(const GLuint slot) const
 	{
-		assert(slot >= GL_TEXTURE0);
+		PICOGL_ASSERT(slot >= GL_TEXTURE0);
 		bind();
 		glActiveTexture(slot);
 	}
 
 	inline void Texture::bind_as_image(const GLuint unit, const GLint level, const GLint layer, const GLenum access) const
 	{
-		glBindImageTexture(unit, m_gl, level, is_array(), layer, access, m_internal_format);
+		glBindImageTexture(unit, m_gl, level, (m_array_size > 1), layer, access, m_internal_format);
 	}
 
 	inline Texture::operator GLuint() const

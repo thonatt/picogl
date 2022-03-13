@@ -1,17 +1,16 @@
 #pragma once
 
-#include <picogl/framework/image.h>
-
 #include <glad/glad.h>
+#include <picogl/framework/image.h>
 #include <picogl/picogl.hpp>
 
 #include <glm/glm.hpp>
 
 #include <cstddef>
-#include <string>
 #include <filesystem>
-#include <vector>
 #include <random>
+#include <string>
+#include <vector>
 
 namespace framework
 {
@@ -52,11 +51,11 @@ namespace framework
 	picogl::Texture make_texture_from_image(const Image& src, GLenum internal_format);
 	picogl::Texture make_cubemap_from_file(const std::filesystem::path& filepath, GLenum internal_format);
 
-	namespace impl
+	namespace utils
 	{
 		float smoothstep(const float a, const float b, const float t);
 
-		template<typename T, int N>
+		template<typename T = float, int N = 1>
 		glm::vec<N, T> make_random_vec();
 
 		template<typename T, int N>
@@ -73,8 +72,8 @@ namespace framework
 		template<typename T, int N>
 		glm::vec<N, T> make_random_vec()
 		{
-			static std::random_device device;
-			static std::mt19937 generator(device());
+			static thread_local std::random_device device;
+			static thread_local std::mt19937 generator(device());
 
 			std::uniform_real_distribution<T> distribution(T(-1), T(1));
 
