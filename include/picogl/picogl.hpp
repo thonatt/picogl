@@ -224,6 +224,8 @@ namespace picogl
 		GLsizei lod_count_2D() const;
 		GLsizei lod_count_3D() const;
 
+		void generate_mipmap() const;
+
 	private:
 		void make(
 			const GLenum target,
@@ -334,6 +336,7 @@ namespace picogl
 		Mesh& set_instances_count(const std::vector<GLuint>& instances_count);
 
 		void draw() const;
+		void draw(GLenum primitive_type) const;
 		void draw(GLenum primitive_type, GLsizei force_vertex_count) const;
 
 		operator GLuint() const;
@@ -1130,6 +1133,12 @@ namespace picogl
 		return static_cast<GLsizei>(std::floor(std::log2(std::max({ m_width, m_height, m_depth })))) + 1;
 	}
 
+	inline void Texture::generate_mipmap() const
+	{
+		bind();
+		glGenerateMipmap(m_target);
+	}
+
 	inline Framebuffer Framebuffer::make(const GLsizei width, const GLsizei height, const GLsizei sample_count)
 	{
 		Framebuffer framebuffer;
@@ -1469,17 +1478,22 @@ namespace picogl
 
 	inline void Mesh::draw() const
 	{
+		draw(m_primitive_type);
+	}
+
+	inline void Mesh::draw(GLenum primitive_type) const
+	{
 		PICOGL_ASSERT(m_vao);
 		glBindVertexArray(m_vao);
 		if (m_index_buffer) {
 			m_index_buffer.bind();
 			if (m_indirect_draw_buffer) {
 				m_indirect_draw_buffer.bind();
-				glMultiDrawElementsIndirect(m_primitive_type, m_indice_type, 0, GLsizei(m_submeshes.size()), 0);
+				glMultiDrawElementsIndirect(primitive_type, m_indice_type, 0, GLsizei(m_submeshes.size()), 0);
 			} else
-				glDrawElements(m_primitive_type, m_index_count, m_indice_type, 0);
+				glDrawElements(primitive_type, m_index_count, m_indice_type, 0);
 		} else
-			glDrawArrays(m_primitive_type, 0, m_index_count);
+			glDrawArrays(primitive_type, 0, m_index_count);
 	}
 
 	inline void Mesh::draw(GLenum primitive_type, GLsizei force_vertex_count) const
