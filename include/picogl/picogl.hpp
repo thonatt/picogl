@@ -69,8 +69,8 @@ namespace picogl
 			static GLObject make(Args&& ...args);
 
 			GLObject();
-			GLObject(GLObject&& rhs);
-			GLObject& operator=(GLObject&& rhs);
+			GLObject(GLObject&& rhs) noexcept;
+			GLObject& operator=(GLObject&& rhs) noexcept;
 
 			operator GLuint() const;
 
@@ -256,6 +256,7 @@ namespace picogl
 	public:
 		static Framebuffer make(const GLsizei width, const GLsizei height, const GLsizei sample_count = 1);
 		static Framebuffer get_default(const GLsizei width = 0, const GLsizei height = 0, const GLsizei sample_count = 1);
+		static Framebuffer make_from_texture(Texture&& texture);
 
 		Framebuffer& set_depth_attachment(const GLenum format = GL_DEPTH_COMPONENT32);
 		Framebuffer& add_color_attachment(const GLenum internal_format, const GLenum target = GL_TEXTURE_2D);
@@ -277,6 +278,19 @@ namespace picogl
 			Framebuffer& to,
 			const GLenum attachment_to = GL_COLOR_ATTACHMENT0,
 			const GLenum filter = GL_NEAREST,
+			const GLenum attachment_from = GL_COLOR_ATTACHMENT0) const;
+
+		void blit_to(Framebuffer& to,
+			GLint to_x,
+			GLint to_y,
+			GLint to_w,
+			GLint to_h,
+			const GLenum attachment_to,
+			const GLenum filter,
+			GLint from_x,
+			GLint from_y,
+			GLint from_w,
+			GLint from_h,
 			const GLenum attachment_from = GL_COLOR_ATTACHMENT0) const;
 
 		GLsizei sample_count() const;
@@ -465,13 +479,13 @@ namespace picogl
 		inline GLObject<Type>::GLObject() = default;
 
 		template<GLObjectType Type>
-		inline GLObject<Type>::GLObject(GLObject&& rhs)
+		inline GLObject<Type>::GLObject(GLObject&& rhs) noexcept
 		{
 			std::swap(m_id, rhs.m_id);
 		}
 
 		template<GLObjectType Type>
-		inline GLObject<Type>& GLObject<Type>::operator=(GLObject&& rhs)
+		inline GLObject<Type>& GLObject<Type>::operator=(GLObject&& rhs) noexcept
 		{
 			std::swap(m_id, rhs.m_id);
 			return *this;
@@ -1224,9 +1238,14 @@ namespace picogl
 
 	inline void Framebuffer::blit_to(Framebuffer& to, const GLenum attachment_to, const GLenum filter, const GLenum attachment_from) const
 	{
+		blit_to(to, 0, 0, to.m_width, to.m_height, attachment_to, filter, 0, 0, m_width, m_height, attachment_from);
+	}
+
+	inline void Framebuffer::blit_to(Framebuffer& to, GLint to_x, GLint to_y, GLint to_w, GLint to_h, const GLenum attachment_to, const GLenum filter, GLint from_x, GLint from_y, GLint from_w, GLint from_h, const GLenum attachment_from) const
+	{
 		bind_read(attachment_from);
 		to.bind_draw(attachment_to);
-		glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, to.m_width, to.m_height, GL_COLOR_BUFFER_BIT, filter);
+		glBlitFramebuffer(from_x, from_y, from_w, from_h, to_x, to_y, to_w, to_h, GL_COLOR_BUFFER_BIT, filter);
 	}
 
 	inline GLsizei Framebuffer::sample_count() const
