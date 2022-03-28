@@ -629,6 +629,7 @@ namespace picogl
 				{ GL_R32F, { GL_R32F, GL_RED, GL_FLOAT, 1 } },
 				{ GL_R32I, { GL_R32I, GL_RED_INTEGER, GL_INT, 1 } },
 				{ GL_RG32I, { GL_RG32I, GL_RG_INTEGER, GL_INT, 2 } },
+				{ GL_RG32F, { GL_RG32F, GL_RG, GL_FLOAT, 2 } },
 				{ GL_RGB8, { GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, 3 } },
 				{ GL_RGB32I, { GL_RGB32I, GL_RGB_INTEGER, GL_INT, 3 } },
 				{ GL_RGB32F, { GL_RGB32F, GL_RGB, GL_FLOAT, 3 } },
