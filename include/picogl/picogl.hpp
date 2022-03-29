@@ -261,7 +261,7 @@ namespace picogl
 		static Framebuffer make_from_texture(Texture&& texture);
 
 		Framebuffer& set_depth_attachment(const GLenum format = GL_DEPTH_COMPONENT32);
-		Framebuffer& add_color_attachment(const GLenum internal_format, const GLenum target = GL_TEXTURE_2D);
+		Framebuffer& add_color_attachment(const GLenum internal_format, const GLenum target = GL_TEXTURE_2D, Texture::Options options = {});
 
 		void bind(const GLenum target = GL_FRAMEBUFFER) const;
 		void bind_read(const GLenum attachment) const;
@@ -1173,10 +1173,9 @@ namespace picogl
 		return *this;
 	}
 
-	inline Framebuffer& Framebuffer::add_color_attachment(const GLenum internal_format, const GLenum target)
+	inline Framebuffer& Framebuffer::add_color_attachment(const GLenum internal_format, const GLenum target, Texture::Options options)
 	{
 		const GLenum attachment_index = GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(m_color_attachments.size());
-		Texture::Options options = {};
 		if (m_depth_attachment)
 			options = options | Texture::Options::FixedSampleLocations | Texture::Options::AutomaticAlignment;
 
@@ -1205,7 +1204,7 @@ namespace picogl
 
 	inline void Framebuffer::bind_read(const GLenum attachment) const
 	{
-		PICOGL_ASSERT(attachment >= GL_COLOR_ATTACHMENT0);
+		//PICOGL_ASSERT(attachment >= GL_COLOR_ATTACHMENT0);
 		bind(GL_READ_FRAMEBUFFER);
 		glReadBuffer(attachment);
 	}
