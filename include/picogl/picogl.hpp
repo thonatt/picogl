@@ -525,9 +525,9 @@ namespace picogl
 
 	template<typename Container>
 	Mesh::VertexAttribute::VertexAttribute(const Container& container, const GLenum type, const GLsizei channels, const bool normalized)
-		: m_data{ reinterpret_cast<const char*>(container.data()) }, m_channel_count{ channels }, m_type{ type }, m_normalized{ normalized }
+		: m_data{ reinterpret_cast<const char*>(container.data()) }, m_type{ type }, m_channel_count{ channels }, m_normalized{ normalized }
 	{
-		constexpr std::size_t element_sizeof = sizeof(Container::value_type);
+		constexpr std::size_t element_sizeof = sizeof(typename Container::value_type);
 		PICOGL_ASSERT(element_sizeof% channels == 0);
 		m_size = impl::get_data_size(container);
 	}
@@ -536,7 +536,7 @@ namespace picogl
 	Mesh& Mesh::set_indices(const GLenum primitive_type, const Container& indices, const GLenum type)
 	{
 		const GLuint type_sizeof = impl::get_scalar_sizeof(type);
-		const GLuint indice_sizeof = sizeof(Container::value_type);
+		const GLuint indice_sizeof = sizeof(typename Container::value_type);
 
 		PICOGL_ASSERT(m_vao);
 		PICOGL_ASSERT(!indices.empty());
@@ -577,7 +577,7 @@ namespace picogl
 			else if constexpr (std::is_same_v<T, GLuint>)
 				glClearBufferiv(buffer, 0, rgba.data());
 			else
-				static_assert(false, "Not a GL supported type");
+				PICOGL_ASSERT(false);
 		}
 	}
 
@@ -593,7 +593,7 @@ namespace picogl
 		else if constexpr (std::is_same_v<T, GLuint64>)
 			glGetQueryObjectui64v(m_gl, type, &t);
 		else
-			static_assert(false, "Not a GL supported type");
+			PICOGL_ASSERT(false);
 	}
 }
 
@@ -680,7 +680,7 @@ namespace picogl
 		return gl_err;
 	}
 
-	inline GLenum picogl::gl_framebuffer_status(std::string& message, const GLenum target)
+	inline GLenum gl_framebuffer_status(std::string& message, const GLenum target)
 	{
 		static const std::unordered_map<GLenum, std::string> errors = {
 			PICOGL_ENUM_STR(GL_FRAMEBUFFER_UNDEFINED),
@@ -760,6 +760,7 @@ namespace picogl
 	{
 		Shader shader;
 		shader.m_gl = impl::GLObject<impl::GLObjectType::Shader>::make(type);
+		shader.m_type = type;
 
 		const char* code_ptr = code.c_str();
 		glShaderSource(shader, 1, &code_ptr, NULL);

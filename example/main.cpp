@@ -195,7 +195,7 @@ struct TexWindow : Window, framework::Viewport2D
 		perf_gui();
 	}
 
-	void gui_body()
+	void gui_body() override
 	{
 		framework::Viewport2D::gui_body();
 
@@ -417,7 +417,8 @@ struct ModelerWindow : Window, framework::Viewport3D
 
 		m_meshes.push_back(make_mesh_from_file("../example/resources/apple.obj"));
 		m_meshes.push_back(make_mesh_from_file("../example/resources/banana.obj"));
-		m_meshes.push_back(make_mesh(framework::make_torus(1.0f, 0.4f, 32u)));
+		auto torus = framework::make_torus(1.0f, 0.4f, 32u);
+		m_meshes.push_back(make_mesh(torus));
 
 		m_combined_mesh = picogl::Mesh::combine({
 			m_meshes[0].m_gl_mesh,
@@ -442,8 +443,6 @@ struct ModelerWindow : Window, framework::Viewport3D
 
 		ImGui::SliderInt("Sample Count", &m_sample_count, 1, max_sample_count);
 
-		const GLsizei object_count = m_combined_mesh.get_submeshes_count();
-		const int old_count = m_instance_count;
 		if (ImGui::SliderInt("Instance Count", &m_instance_count, 1, 500))
 			set_instances();
 
