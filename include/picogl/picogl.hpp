@@ -605,8 +605,10 @@ namespace picogl
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstring>
 #include <functional>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 
 #define PICOGL_ENUM_STR(name) { name, #name }

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cassert>
 #include <cstring>
+#include <cstdint>
 
 namespace framework
 {
@@ -76,7 +77,7 @@ namespace framework
 	template<typename T>
 	inline Image Image::mul(const Image& rhs) const
 	{
-		assert(m_pixel_size == rhs.m_pixel_size);
+		assert(m_pixel_sizeof == rhs.m_pixel_sizeof);
 		Image dst = Image::make<T>(m_width, m_height, m_channel_count);
 		for (std::uint32_t y = 0; y < m_height; ++y)
 			for (std::uint32_t x = 0; x < m_width; ++x)

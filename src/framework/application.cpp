@@ -18,7 +18,10 @@ namespace framework
 	void Application::setup()
 	{
 		if (!glfwInit())
+		{
+			spdlog::error("glfwInit failed: {}", glfwGetError(NULL));
 			return;
+		}
 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
@@ -46,7 +49,10 @@ namespace framework
 		glfwSwapInterval(static_cast<int>(std::round(mode->refreshRate / desired_fps)));
 
 		if (!gladLoadGL())
+		{
+			spdlog::error("gladLoadGL failed");
 			return;
+		}
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
