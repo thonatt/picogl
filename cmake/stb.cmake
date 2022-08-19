@@ -17,15 +17,15 @@ FetchContent_MakeAvailable(stb)
 
 if(USE_STB_IMAGE)
 	message(STATUS "Creating target 'stb::image'")
-	file(GLOB STB_IMAGE_FILE "${stb_SOURCE_DIR}/stb_image.h")
-	set_source_files_properties(
-		${STB_IMAGE_FILE} PROPERTIES
-		LANGUAGE CXX
-	)
+	#file(GLOB STB_IMAGE_FILE "${stb_SOURCE_DIR}/stb_image.h")
+	#set_source_files_properties(
+	#	${STB_IMAGE_FILE} PROPERTIES
+	#	LANGUAGE CXX
+	#)
 
-	add_library(stb_image STATIC ${STB_IMAGE_FILE})
-	target_include_directories(stb_image PUBLIC ${stb_SOURCE_DIR})
-	target_compile_definitions(stb_image PRIVATE STB_IMAGE_IMPLEMENTATION)
+	add_library(stb_image INTERFACE)
+	target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
+	#target_compile_definitions(stb_image PRIVATE STB_IMAGE_IMPLEMENTATION)
 
 	add_library(stb::image ALIAS stb_image)
 endif()
